@@ -49,7 +49,7 @@ final class Task2 {
         private final int width;
         private final int height;
 
-        public Rectangle(int width, int height) {
+        Rectangle(int width, int height) {
             this.width = width;
             this.height = height;
         }
@@ -78,7 +78,7 @@ final class Task2 {
     public static class Square extends Rectangle {
         private final int side;
 
-        public Square(int side) {
+        Square(int side) {
             super(side, side);
             this.side = side;
         }
