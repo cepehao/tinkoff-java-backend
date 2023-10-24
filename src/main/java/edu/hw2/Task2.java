@@ -62,29 +62,18 @@ final class Task2 {
             return new Rectangle(width, height);
         }
 
-        public final int getWidth() {
-            return width;
-        }
-
-        public final int getHeight() {
-            return height;
-        }
-
         public double area() {
             return width * height;
         }
     }
 
     public static class Square extends Rectangle {
-        private final int side;
-
         Square(int side) {
             super(side, side);
-            this.side = side;
         }
 
-        public int getSide() {
-            return side;
+        public Square setSide(int side) {
+            return new Square(side);
         }
     }
 }

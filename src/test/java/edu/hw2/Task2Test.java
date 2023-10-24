@@ -15,7 +15,7 @@ class Task2Test {
 
     @SuppressWarnings("MagicNumber")
     static Arguments[] rectangles() {
-        return new Arguments[]{
+        return new Arguments[] {
             Arguments.of(new Rectangle(10, 10)),
             Arguments.of(new Square(10))
         };
@@ -56,6 +56,23 @@ class Task2Test {
     void testRectangle() {
         rectangle = new Rectangle(5, 10);
         assertThat(rectangle.area()).isEqualTo(50);
+    }
+
+    @Test
+    @DisplayName("Меняем классы")
+    @SuppressWarnings("MagicNumber")
+    void testChangesClasses() {
+        rectangle = new Square(5);
+        assertThat(rectangle.area()).isEqualTo(25);
+        rectangle = rectangle.setHeight(7);
+        rectangle = rectangle.setWidth(8);
+        assertThat(rectangle.area()).isEqualTo(56);
+        Square square = new Square(7);
+        assertThat(square.area()).isEqualTo(49);
+        rectangle = square.setSide(3);
+        assertThat(rectangle.area()).isEqualTo(9);
+        rectangle = rectangle.setHeight(1);
+        assertThat(rectangle.area()).isEqualTo(3);
     }
 
 }
