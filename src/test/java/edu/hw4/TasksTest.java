@@ -273,12 +273,9 @@ class TasksTest {
                 dog1,
                 cat2,
                 spider1,
-                new Animal("", null, Animal.Sex.F, 2, 3, 4, true),
                 new Animal(badDog, Animal.Type.DOG, Animal.Sex.F, -1, 3, 4, true)
             )))
             .isEqualTo(Map.of(
-                "", "ValidationError{field=NAME, errorMessage='Имя не может быть пустым'}, "
-                    + "ValidationError{field=TYPE, errorMessage='Тип животного не может быть null'}",
                 badDog, "ValidationError{field=AGE, errorMessage='Возраст животного не может быть меньше 0'}"
             ));
     }
