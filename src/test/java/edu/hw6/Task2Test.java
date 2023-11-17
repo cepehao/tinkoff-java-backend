@@ -22,15 +22,13 @@ class Task2Test {
     void cloneFile(String copyPath) throws FileNotFoundException {
         Path path = Paths.get(STRING_RESOURCES_PATH);
 
-        if (!Files.exists(path)) {
-            try {
-                Files.createFile(path);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        if (Files.exists(path)) {
+            Task2.cloneFile(path);
+            Assertions.assertThat(Files.exists(Paths.get(copyPath))).isTrue();
+        }else {
+            Assertions.assertThatThrownBy(
+                () -> Task2.cloneFile(path)
+            ).isInstanceOf(FileNotFoundException.class);
         }
-
-        Task2.cloneFile(path);
-        Assertions.assertThat(Files.exists(Paths.get(copyPath))).isTrue();
     }
 }
