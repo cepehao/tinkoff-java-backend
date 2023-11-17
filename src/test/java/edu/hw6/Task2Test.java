@@ -1,14 +1,12 @@
 package edu.hw6;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-
 
 class Task2Test {
     private static final String STRING_RESOURCES_PATH = "src/test/resources/hw6/task2/test.txt";
@@ -25,7 +23,7 @@ class Task2Test {
         if (Files.exists(path)) {
             Task2.cloneFile(path);
             Assertions.assertThat(Files.exists(Paths.get(copyPath))).isTrue();
-        }else {
+        } else {
             Assertions.assertThatThrownBy(
                 () -> Task2.cloneFile(path)
             ).isInstanceOf(FileNotFoundException.class);
