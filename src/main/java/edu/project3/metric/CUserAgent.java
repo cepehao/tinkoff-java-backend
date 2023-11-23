@@ -1,30 +1,29 @@
 package edu.project3.metric;
 
 import edu.project3.model.CNginxData;
-import edu.project3.utils.CHttpStatusCode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CResponseCodes implements IMetric {
-    private static final String HEADER = "Коды ответа";
-    private static final String[] COLUMN_TITLES = new String[] {"Код", "Имя", "Количество"};
+public class CUserAgent implements IMetric {
+    private static final String HEADER = "Пользовательские агенты";
+    private static final String[] COLUMN_TITLES = new String[] {"Агент", "Количество"};
 
-    private final Map<Integer, Integer> responsesMap;
+    private final Map<String, Integer> agentsMap;
 
-    public CResponseCodes() {
-        responsesMap = new HashMap<>();
+    public CUserAgent() {
+        agentsMap = new HashMap<>();
     }
 
     @Override
     public void processNginxData(CNginxData nginxData) {
-        var statusCode = nginxData.status();
+        var agentName = getAgentName(nginxData.httpUserAgent());
 
-        if (responsesMap.containsKey(statusCode)) {
-            responsesMap.put(statusCode, responsesMap.get(statusCode) + 1);
+        if (agentsMap.containsKey(agentName)) {
+            agentsMap.put(agentName, agentsMap.get(agentName) + 1);
         } else {
-            responsesMap.put(statusCode, 1);
+            agentsMap.put(agentName, 1);
         }
     }
 
@@ -40,7 +39,7 @@ public class CResponseCodes implements IMetric {
 
     @Override
     public List<String[]> getInfo() {
-        var entryList = new ArrayList<>(responsesMap.entrySet());
+        var entryList = new ArrayList<>(agentsMap.entrySet());
 
         entryList.sort(Map.Entry.comparingByValue());
 
@@ -50,13 +49,11 @@ public class CResponseCodes implements IMetric {
         while (i < TOP_THREE_STATS && i < entryList.size()) {
             int j = entryList.size() - 1 - i;
 
-            var code = entryList.get(j).getKey();
-            var codeName = CHttpStatusCode.getStatusCodeName(code);
+            var agentName = entryList.get(j).getKey();
             var count = entryList.get(j).getValue();
 
             infoList.add(new String[] {
-                code.toString(),
-                codeName,
+                agentName,
                 count.toString()
             });
 
@@ -64,5 +61,9 @@ public class CResponseCodes implements IMetric {
         }
 
         return infoList;
+    }
+
+    private String getAgentName(String userAgent) {
+        return userAgent.split(" ")[0];
     }
 }

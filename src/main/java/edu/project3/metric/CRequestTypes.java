@@ -1,30 +1,30 @@
 package edu.project3.metric;
 
 import edu.project3.model.CNginxData;
-import edu.project3.utils.CHttpStatusCode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CResponseCodes implements IMetric {
-    private static final String HEADER = "Коды ответа";
-    private static final String[] COLUMN_TITLES = new String[] {"Код", "Имя", "Количество"};
+public final class CRequestTypes implements IMetric {
+    private static final String HEADER = "Типы запросов";
+    private static final String[] COLUMN_TITLES = new String[] {"Тип запроса", "Количество"};
 
-    private final Map<Integer, Integer> responsesMap;
+    private final Map<String, Integer> requestsMap;
 
-    public CResponseCodes() {
-        responsesMap = new HashMap<>();
+    public CRequestTypes() {
+        requestsMap = new HashMap<>();
     }
+
 
     @Override
     public void processNginxData(CNginxData nginxData) {
-        var statusCode = nginxData.status();
+        var requestType = nginxData.requestType().toString();
 
-        if (responsesMap.containsKey(statusCode)) {
-            responsesMap.put(statusCode, responsesMap.get(statusCode) + 1);
+        if (requestsMap.containsKey(requestType)) {
+            requestsMap.put(requestType, requestsMap.get(requestType) + 1);
         } else {
-            responsesMap.put(statusCode, 1);
+            requestsMap.put(requestType, 1);
         }
     }
 
@@ -40,7 +40,7 @@ public class CResponseCodes implements IMetric {
 
     @Override
     public List<String[]> getInfo() {
-        var entryList = new ArrayList<>(responsesMap.entrySet());
+        var entryList = new ArrayList<>(requestsMap.entrySet());
 
         entryList.sort(Map.Entry.comparingByValue());
 
@@ -50,13 +50,11 @@ public class CResponseCodes implements IMetric {
         while (i < TOP_THREE_STATS && i < entryList.size()) {
             int j = entryList.size() - 1 - i;
 
-            var code = entryList.get(j).getKey();
-            var codeName = CHttpStatusCode.getStatusCodeName(code);
+            var requestType = entryList.get(j).getKey();
             var count = entryList.get(j).getValue();
 
             infoList.add(new String[] {
-                code.toString(),
-                codeName,
+                requestType,
                 count.toString()
             });
 

@@ -1,18 +1,15 @@
-package edu.project3.parser;
+package edu.project3.nginx;
 
 import edu.project3.metric.CMetricManager;
 import edu.project3.metric.IMetric;
-import edu.project3.model.CConfiguration;
 import edu.project3.model.CNginxData;
 import edu.project3.model.ERequestType;
-import edu.project3.utils.CLogger;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -25,8 +22,7 @@ import java.util.regex.Pattern;
 import static edu.project3.utils.CLogger.LOGGER;
 
 public class CNginxLogParser {
-    private CConfiguration configuration;
-    // 217.168.17.5 - - [17/May/2015:08:05:42 +0000] "GET /downloads/product_1 HTTP/1.1" 404 332 "-" "Debian APT-HTTP/1.3 (0.8.10.3)"
+    private final CConfiguration configuration;
     private static final Pattern NGNIX_LOG_PATTERN =
         Pattern.compile(
             "^(\\S+) (\\S+ \\S+) \\[([^]]+)] \"([A-Z]+) (\\S+) (\\S+)\" (\\d{3}) (\\d+) \"(\\S+)\" \"([^\"]*)\".*"
@@ -39,43 +35,43 @@ public class CNginxLogParser {
     }
 
     public List<IMetric> parse() {
-        CMetricManager metricManager;
+        var metricManager = new CMetricManager(configuration);
 
-        try(BufferedReader reader = getBufferedReader()) {
-            metricManager = new CMetricManager(configuration);
+        for (int i = 0; i < configuration.getStringPaths().length; i++) {
+            try (BufferedReader reader = getBufferedReader(i)) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    var matcher = NGNIX_LOG_PATTERN.matcher(line);
 
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+                    if (matcher.find()) {
+                        var nginxData = buildNginxData(matcher);
 
-                var matcher = NGNIX_LOG_PATTERN.matcher(line);
-
-                if (matcher.find()) {
-                    var nginxData = buildNginxData(matcher);
-                    metricManager.manageNginxData(nginxData);
-                } else {
-                    LOGGER.warn("Некорректный формат лога: " + line);
+                        if (isGoodDate(nginxData.timeLocal().toLocalDate())) {
+                            metricManager.manageNginxData(nginxData);
+                        }
+                    } else {
+                        LOGGER.warn("Некорректный формат лога: " + line);
+                    }
                 }
+            } catch (IOException ex) {
+                LOGGER.error("Не удалось получить доступ к файлу");
+                return null;
             }
-        }catch (IOException ex) {
-            LOGGER.error("Не удалось получить доступ к файлу");
-            return null;
         }
-
-        // todo проверка from to
         return metricManager.getMetricList();
     }
 
-    private BufferedReader getBufferedReader() throws IOException {
-        if (configuration.isLocalFile()) {
-            return new BufferedReader(new FileReader(configuration.getStringPath()));
+    private BufferedReader getBufferedReader(int pathIndex) throws IOException {
+        if (configuration.isLocalFile(pathIndex)) {
+            return new BufferedReader(new FileReader(configuration.getStringPath(pathIndex)));
         } else {
-            var url = new URL(configuration.getStringPath());
+            var url = new URL(configuration.getStringPath(pathIndex));
             var connection = (HttpURLConnection) url.openConnection();
             return new BufferedReader(new InputStreamReader(connection.getInputStream()));
         }
     }
 
+    @SuppressWarnings("MagicNumber")
     private CNginxData buildNginxData(Matcher logMatcher) {
 
      return new CNginxData(
@@ -94,9 +90,28 @@ public class CNginxLogParser {
         try {
             var offsetDateTime = OffsetDateTime.parse(englishStringTime, FORMATTER_ENGLISH);
             return offsetDateTime.toLocalDateTime();
-        }catch (DateTimeParseException ex) {
-            LOGGER.warn("Некорректный формат даты: "+ englishStringTime);
+        } catch (DateTimeParseException ex) {
+            LOGGER.warn("Некорректный формат даты: " + englishStringTime);
             return null;
         }
+    }
+
+    private boolean isGoodDate(LocalDate nginxLocalDate) {
+        var start = configuration.getFrom();
+        var end = configuration.getTo();
+
+        if (start == null && end == null) {
+            return true;
+        }
+
+        if (start == null && end != null) {
+            return nginxLocalDate.isBefore(end);
+        }
+
+        if (start != null && end == null) {
+            return nginxLocalDate.isAfter(start);
+        }
+
+        return (nginxLocalDate.isBefore(end) && nginxLocalDate.isAfter(start));
     }
 }

@@ -1,41 +1,29 @@
 package edu.project3.metric;
 
-import edu.project3.model.CConfiguration;
 import edu.project3.model.CNginxData;
+import edu.project3.nginx.CConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CMetricManager {
-    private CConfiguration configuration;
-    private IMetric generalInfo;
-    private IMetric resourcesRequested;
-//    private IMetric responseCodes;
-
-    private List<IMetric> metricList;
+    private final List<IMetric> metricList;
 
     public CMetricManager(CConfiguration configuration) {
-        this.configuration = configuration;
-
-//        generalInfo = new CGeneralInfo(configuration);
-//        resourcesRequested = new CResourcesRequested();
         metricList = new ArrayList<>();
         metricList.add(new CGeneralInfo(configuration));
-        metricList.add(resourcesRequested = new CResourcesRequested());
-
-
-
-//        responseCodes = new CResponseCodes();
+        metricList.add(new CResponseCodes());
+        metricList.add(new CResourcesRequested());
+        metricList.add(new CUserAgent());
+        metricList.add(new CRequestTypes());
     }
 
     public void manageNginxData(CNginxData nginxData) {
         for (var metric: metricList) {
-            metric.ProcessNginxData(nginxData);
+            metric.processNginxData(nginxData);
         }
     }
 
     public List<IMetric> getMetricList() {
         return metricList;
     }
-
-
 }
