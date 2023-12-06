@@ -2,18 +2,17 @@ package edu.project1.dictionary;
 
 import java.util.Random;
 
-public final class CDictionary implements IDictionary {
+public final class CDictionary {
     private static final Random RANDOM = new Random();
 
-    private final String[] dictionary;
+    private final String[] words;
 
     public CDictionary(String[] dictionary) {
-        this.dictionary = dictionary;
+        this.words = dictionary;
     }
 
-    @Override
     public String randomWord() {
-        return dictionary[RANDOM.nextInt(dictionary.length)];
+        return words[RANDOM.nextInt(words.length)];
     }
 }
 
