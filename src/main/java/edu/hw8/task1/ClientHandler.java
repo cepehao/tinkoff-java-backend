@@ -9,7 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 class ClientHandler implements Runnable {
-    private final static Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
     private static final int BUFF_SIZE = 1024;
     private static final String DEFAULT_ANSWER = "На такой глупый вопрос ответ еще не придумали";
 

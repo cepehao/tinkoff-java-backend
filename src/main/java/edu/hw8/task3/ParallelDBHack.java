@@ -15,7 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class ParallelDBHack extends DBHack {
-    private final static Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
     private final ConcurrentMap<String, String> usersDatabase;
     private final ConcurrentMap<String, String> actualPasswords;
     private final ExecutorService executor;
