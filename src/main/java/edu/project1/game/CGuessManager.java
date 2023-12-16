@@ -37,9 +37,9 @@ public final class CGuessManager {
         } else if (word.isSubstring(playerInput.charAt(0))) {
             LOGGER.info("Hit!");
             LOGGER.info("The word: " + word.curState());
+        } else {
+            LOGGER.info("Missed, mistake " + ++curAttempt + " out of " + maxAttempts);
         }
-
-        LOGGER.info("Missed, mistake " + ++curAttempt + " out of " + maxAttempts);
     }
 
     public boolean isWon() {
